@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متتبع يوميات العمل والأهداف مع الرزنامة - حتى 10 سبتمبر 2027</title>
+<!-- Tailwind CSS for responsive layout helpers and custom modal -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #0f766e;
+    --primary-dark: #115e59;
+    --primary-light: #ccfbf1;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --success: #16a34a;
+    --success-bg: #dcfce7;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+  }
+  * {
+    box-sizing: border-box;
+    font-family: 'Tajawal', 'Inter', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    padding: 16px;
+  }
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  button, select, input {
+    font-family: inherit;
+  }
+  button.app-btn {
+    padding: 9px 15px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  button.app-btn:hover {
+    background: #f1f5f9;
+  }
+  button.app-btn.primary {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  button.app-btn.primary:hover {
+    background: var(--primary-dark);
+  }
+  button.app-btn.danger {
+    color: var(--danger);
+    border-color: #fecaca;
+    background: var(--danger-bg);
+  }
+  button.app-btn.danger:hover {
+    background: #fee2e2;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--card);
+    padding: 15px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .stat-value {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .stat-value.highlight {
+    color: var(--primary);
+  }
+  .stat-value.ded {
+    color: var(--danger);
+  }
+
+  .goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .goal-card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .goal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .goal-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .goal-target {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--primary-dark);
+  }
+  .goal-sub {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.84rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #10b981);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  .options-bar {
+    background: var(--card);
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  label.check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  label.check-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  /* Calendar Section */
+  .calendar-card {
+    background: var(--card);
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .calendar-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .calendar-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+  }
+  .calendar-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .calendar-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 0.84rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .dot.worked { background: var(--success); }
+  .dot.worked-ded { background: #f59e0b; }
+  .dot.unworked { background: #f1f5f9; border: 1px solid var(--border); }
+  .dot.out-range { background: #f8fafc; border: 1px dashed #cbd5e1; }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .cal-dow {
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.84rem;
+    color: var(--muted);
+    padding: 7px 4px;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+  .cal-day {
+    min-height: 64px;
+    padding: 6px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    user-select: none;
+  }
+  .cal-day:hover:not(.disabled) {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(15, 118, 110, 0.12);
+  }
+  .cal-day.disabled {
+    background: #f8fafc;
+    border-style: dashed;
+    color: #94a3b8;
+    cursor: default;
+  }
+  .cal-day.worked {
+    background: var(--success-bg);
+    border-color: #86efac;
+  }
+  .cal-day.worked-ded {
+    background: #fef3c7;
+    border-color: #fcd34d;
+  }
+  .cal-day-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    font-weight: 800;
+  }
+  .cal-day-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .cal-day.worked .cal-day-badge {
+    background: var(--success);
+    color: #fff;
+  }
+  .cal-day.worked-ded .cal-day-badge {
+    background: #d97706;
+    color: #fff;
+  }
+  .cal-day-sub {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .table-wrap {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    max-height: 70vh;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 820px;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  [dir="ltr"] th, [dir="ltr"] td {
+    text-align: left;
+  }
+  th {
+    background: #f1f5f9;
+    font-weight: 700;
+    color: var(--muted);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  tr.done {
+    background: var(--success-bg);
+  }
+  tr.done-ded {
+    background: #fef3c7;
+  }
+  .toggle-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    min-width: 112px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  tr.done .toggle-btn {
+    background: var(--success);
+    color: #fff;
+    border-color: var(--success);
+  }
+  tr.done-ded .toggle-btn {
+    background: #d97706;
+    color: #fff;
+    border-color: #d97706;
+  }
+  input.num-input {
+    width: 105px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.95);
+    text-align: center;
+  }
+  input.note-input {
+    width: 100%;
+    min-width: 140px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    background: rgba(255,255,255,0.95);
+  }
+  @media (max-width: 640px) {
+    .cal-day { min-height: 54px; padding: 4px; }
+    .cal-day-badge { display: none; }
+    .cal-day-sub { font-size: 0.65rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1 id="appTitle">متتبع يوميات العمل والأهداف والرزنامة</h1>
+    <div class="controls">
+      <button class="app-btn" id="langBtn" onclick="toggleLang()">Français</button>
+      <button class="app-btn primary" onclick="exportCSV()" id="exportBtn">تصدير CSV</button>
+      <button class="app-btn danger" onclick="openResetModal()" id="resetBtn">إعادة ضبط</button>
+    </div>
+  </div>
+
+  <!-- Summary Stats Cards -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label" id="lblRate">الأجر اليومي</div>
+      <div class="stat-value">2,000 <span class="curr">دج</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lblGross">إجمالي الدخل الخام</div>
+      <div class="stat-value" id="valGross">0 دج</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lblDeductions">إجمالي الخصومات</div>
+      <div class="stat-value ded" id="valDeductions">0 دج</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lblNet">الصافي المحصل</div>
+      <div class="stat-value highlight" id="valNet">0 دج</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" id="lblDays">الأيام المنجزة / المتاحة</div>
+      <div class="stat-value" id="valDays">0 / 0</div>
+    </div>
+  </div>
+
+  <!-- Priority Goals Section -->
+  <div class="goals-grid" id="goalsGrid"></div>
+
+  <!-- Options Bar -->
+  <div class="options-bar">
+    <label class="check-label">
+      <input type="checkbox" id="skipFriday" onchange="toggleSkipFriday()">
+      <span id="lblSkipFriday">تخطي يوم الجمعة تلقائياً (عطلة أسبوعية)</span>
+    </label>
+    <span style="font-size:0.88rem;font-weight:600;color:var(--muted)" id="lblRangeInfo">الفترة: 2026-11-23 إلى 2027-09-10</span>
+  </div>
+
+  <!-- Interactive Monthly Calendar -->
+  <div class="calendar-card">
+    <div class="calendar-header">
+      <div class="calendar-title" id="calMonthTitle">نوفمبر 2026</div>
+      <div class="calendar-nav">
+        <button class="app-btn" onclick="changeMonth(-1)" id="prevMonthBtn">◀ الشهر السابق</button>
+        <button class="app-btn" onclick="jumpToStartMonth()" id="startMonthBtn">بداية الفترة</button>
+        <button class="app-btn" onclick="changeMonth(1)" id="nextMonthBtn">الشهر التالي ▶</button>
+      </div>
+    </div>
+    <div class="calendar-legend">
+      <span class="legend-item"><span class="dot worked"></span> <span id="legWorked">يوم عمل منجز (صافي كامل)</span></span>
+      <span class="legend-item"><span class="dot worked-ded"></span> <span id="legWorkedDed">يوم عمل منجز مع خصم</span></span>
+      <span class="legend-item"><span class="dot unworked"></span> <span id="legUnworked">يوم متاح غير مسجل (انقر لتسجيله)</span></span>
+      <span class="legend-item"><span class="dot out-range"></span> <span id="legOutRange">خارج الفترة المحددة</span></span>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+
+  <!-- Daily Logs Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th id="thNum">#</th>
+          <th id="thDay">اليوم</th>
+          <th id="thDate">التاريخ</th>
+          <th id="thStatus">حالة العمل</th>
+          <th id="thDeduction">الخصومات</th>
+          <th id="thNetDay">صافي اليوم</th>
+          <th id="thCumulative">الصافي التراكمي</th>
+          <th id="thNote">ملاحظات</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Custom Reset Confirmation Modal (Replaces window.confirm) -->
+<div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+    <h3 id="modalTitle" class="text-lg font-bold text-slate-900 mb-2">تأكيد إعادة الضبط</h3>
+    <p id="modalBody" class="text-sm text-slate-600 mb-6 leading-relaxed">
+      هل أنت متأكد من مسح جميع البيانات والخصومات المسجلة؟
+    </p>
+    <div class="flex justify-end gap-3">
+      <button type="button" onclick="closeResetModal()" id="modalCancelBtn" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-100">
+        إلغاء
+      </button>
+      <button type="button" onclick="confirmReset()" id="modalConfirmBtn" class="px-4 py-2 rounded-xl bg-red-600 text-white font-bold text-sm hover:bg-red-700">
+        نعم، مسح الكل
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg"></div>
+
+<script>
+  const DAILY_RATE = 2000;
+  const START_DATE = new Date(2026, 10, 23); // 2026-11-23
+  const END_DATE = new Date(2027, 8, 10);    // 2027-09-10
+
+  // Priority order: Goal 1 -> Goal 2 -> Goal 3
+  const GOALS = [
+    { id: 'brousi', target: 100000, ar: 'الهدف الأول (أولوية 1): brousi', fr: 'Objectif 1 (Priorité 1) : brousi' },
+    { id: 'iphone', target: 150000, ar: 'الهدف الثاني (أولوية 2): iphone 16 pink', fr: 'Objectif 2 (Priorité 2) : iphone 16 pink' },
+    { id: 'tepyicha', target: 100000, ar: 'الهدف الثالث (أولوية 3): tepyicha', fr: 'Objectif 3 (Priorité 3) : tepyicha' }
+  ];
+
+  const i18n = {
+    ar: {
+      dir: 'rtl',
+      langBtn: 'Français',
+      title: 'متتبع يوميات العمل والأهداف والرزنامة',
+      exportBtn: 'تصدير CSV',
+      resetBtn: 'إعادة ضبط',
+      lblRate: 'الأجر اليومي',
+      lblGross: 'إجمالي الدخل الخام',
+      lblDeductions: 'إجمالي الخصومات',
+      lblNet: 'الصافي المحصل',
+      lblDays: 'الأيام المنجزة / المتاحة',
+      lblSkipFriday: 'تخطي يوم الجمعة تلقائياً (عطلة أسبوعية)',
+      lblRangeInfo: 'الفترة: 2026-11-23 إلى 2027-09-10',
+      prevMonth: '◀ الشهر السابق',
+      nextMonth: 'الشهر التالي ▶',
+      startMonth: 'بداية الفترة',
+      legWorked: 'يوم عمل منجز (صافي كامل)',
+      legWorkedDed: 'يوم عمل منجز مع خصم',
+      legUnworked: 'يوم متاح غير مسجل (انقر لتسجيله)',
+      legOutRange: 'خارج الفترة المحددة',
+      thNum: '#',
+      thDay: 'اليوم',
+      thDate: 'التاريخ',
+      thStatus: 'حالة العمل',
+      thDeduction: 'الخصومات',
+      thNetDay: 'صافي اليوم',
+      thCumulative: 'الصافي التراكمي',
+      thNote: 'ملاحظات',
+      btnMark: 'تسجيل عمل',
+      btnDone: '✓ تم العمل',
+      notePlaceholder: 'ملاحظة...',
+      curr: 'دج',
+      daysShort: ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
+      days: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+      months: ['جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان', 'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+      modalTitle: 'تأكيد إعادة الضبط',
+      confirmReset: 'هل أنت متأكد من مسح جميع البيانات والخصومات المسجلة؟ لا يمكن التراجع عن هذه العملية.',
+      modalCancel: 'إلغاء',
+      modalConfirm: 'نعم، مسح الكل',
+      toastReset: 'تمت إعادة ضبط جميع البيانات بنجاح',
+      toastExport: 'تم تصدير ملف CSV بنجاح',
+      goalCollected: 'المحقق',
+      goalRemaining: 'المتبقي',
+      workedBadge: 'منجز'
+    },
+    fr: {
+      dir: 'ltr',
+      langBtn: 'العربية',
+      title: 'Suivi Travail, Objectifs & Calendrier',
+      exportBtn: 'Exporter CSV',
+      resetBtn: 'Réinitialiser',
+      lblRate: 'Salaire Journalier',
+      lblGross: 'Revenu Brut Total',
+      lblDeductions: 'Total Déductions',
+      lblNet: 'Net Gagné',
+      lblDays: 'Jours Faits / Total',
+      lblSkipFriday: 'Ignorer automatiquement le vendredi',
+      lblRangeInfo: 'Période : 2026-11-23 au 2027-09-10',
+      prevMonth: '◀ Mois préc.',
+      nextMonth: 'Mois suiv. ▶',
+      startMonth: 'Début période',
+      legWorked: 'Jour travaillé (net complet)',
+      legWorkedDed: 'Jour travaillé avec déduction',
+      legUnworked: 'Jour disponible (cliquer pour marquer)',
+      legOutRange: 'Hors période',
+      thNum: '#',
+      thDay: 'Jour',
+      thDate: 'Date',
+      thStatus: 'Statut',
+      thDeduction: 'Déductions',
+      thNetDay: 'Net du Jour',
+      thCumulative: 'Cumul Net',
+      thNote: 'Notes',
+      btnMark: 'Marquer travaillé',
+      btnDone: '✓ Travaillé',
+      notePlaceholder: 'Note...',
+      curr: 'DZD',
+      daysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+      days: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+      modalTitle: 'Confirmer la réinitialisation',
+      confirmReset: 'Voulez-vous vraiment réinitialiser toutes les données et déductions ? Cette action est irréversible.',
+      modalCancel: 'Annuler',
+      modalConfirm: 'Oui, tout effacer',
+      toastReset: 'Toutes les données ont été réinitialisées',
+      toastExport: 'Fichier CSV exporté avec succès',
+      goalCollected: 'Atteint',
+      goalRemaining: 'Reste',
+      workedBadge: 'Fait'
+    }
+  };
+
+  let state = {
+    lang: 'ar',
+    skipFriday: false,
+    completed: {},
+    deductions: {},
+    notes: {},
+    viewYear: 2026,
+    viewMonth: 10
+  };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('workGoalTrackerV6'));
+    if (saved && typeof saved === 'object') {
+      state = { ...state, ...saved };
+    }
+  } catch (e) {
+    console.warn('LocalStorage unavailable:', e);
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem('workGoalTrackerV6', JSON.stringify(state));
+    } catch (e) {
+      console.warn('Could not save state:', e);
+    }
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      el.classList.add('hidden');
+    }, 2600);
+  }
+
+  function formatDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function generateDates() {
+    const list = [];
+    let current = new Date(START_DATE.getTime());
+    while (current <= END_DATE) {
+      if (!state.skipFriday || current.getDay() !== 5) {
+        list.push(new Date(current.getTime()));
+      }
+      current.setDate(current.getDate() + 1);
+    }
+    return list;
+  }
+
+  function renderGoals(netAmount, t) {
+    const grid = document.getElementById('goalsGrid');
+    grid.innerHTML = '';
+    let allocated = Math.max(0, netAmount);
+
+    GOALS.forEach((g) => {
+      const got = Math.min(g.target, allocated);
+      allocated = Math.max(0, allocated - got);
+      const rem = Math.max(0, g.target - got);
+      const pct = Math.min(100, Math.round((got / g.target) * 100));
+
+      const card = document.createElement('div');
+      card.className = 'goal-card';
+      card.innerHTML = `
+        <div class="goal-head">
+          <span class="goal-title">${state.lang === 'ar' ? g.ar : g.fr}</span>
+          <span class="goal-target">${g.target.toLocaleString()} ${t.curr}</span>
+        </div>
+        <div class="goal-sub">
+          <span>${t.goalCollected}: <strong>${got.toLocaleString()} ${t.curr}</strong> (${pct}%)</span>
+          <span>${t.goalRemaining}: <strong>${rem.toLocaleString()} ${t.curr}</strong></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderCalendar(activeDateMap, t) {
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    const y = state.viewYear;
+    const m = state.viewMonth;
+    document.getElementById('calMonthTitle').textContent = `${t.months[m]} ${y}`;
+
+    t.daysShort.forEach(dow => {
+      const el = document.createElement('div');
+      el.className = 'cal-dow';
+      el.textContent = dow;
+      grid.appendChild(el);
+    });
+
+    const firstDayOfMonth = new Date(y, m, 1);
+    const startDow = firstDayOfMonth.getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+    for (let i = 0; i < startDow; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'cal-day disabled';
+      grid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dObj = new Date(y, m, day);
+      const key = formatDate(dObj);
+      const inRange = activeDateMap.has(key);
+      const isDone = !!state.completed[key];
+      const dedVal = Math.max(0, Number(state.deductions[key] || 0));
+      const netDay = (isDone ? DAILY_RATE : 0) - dedVal;
+
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      if (!inRange) {
+        cell.classList.add('disabled');
+      } else if (isDone && dedVal > 0) {
+        cell.classList.add('worked-ded');
+      } else if (isDone) {
+        cell.classList.add('worked');
+      }
+
+      if (inRange) {
+        cell.onclick = () => toggleDay(key);
+      }
+
+      let subText = '';
+      if (inRange && isDone) {
+        subText = `${netDay.toLocaleString()} ${t.curr}`;
+      } else if (inRange && dedVal > 0) {
+        subText = `-${dedVal.toLocaleString()} ${t.curr}`;
+      }
+
+      cell.innerHTML = `
+        <div class="cal-day-top">
+          <span>${day}</span>
+          ${inRange && isDone ? `<span class="cal-day-badge">${t.workedBadge}</span>` : ''}
+        </div>
+        <div class="cal-day-sub">${subText}</div>
+      `;
+      grid.appendChild(cell);
+    }
+  }
+
+  function render() {
+    const t = i18n[state.lang];
+    document.documentElement.dir = t.dir;
+    document.documentElement.lang = state.lang;
+    document.getElementById('langBtn').textContent = t.langBtn;
+    document.getElementById('appTitle').textContent = t.title;
+    document.getElementById('exportBtn').textContent = t.exportBtn;
+    document.getElementById('resetBtn').textContent = t.resetBtn;
+    document.getElementById('lblRate').textContent = t.lblRate;
+    document.getElementById('lblGross').textContent = t.lblGross;
+    document.getElementById('lblDeductions').textContent = t.lblDeductions;
+    document.getElementById('lblNet').textContent = t.lblNet;
+    document.getElementById('lblDays').textContent = t.lblDays;
+    document.getElementById('lblSkipFriday').textContent = t.lblSkipFriday;
+    document.getElementById('lblRangeInfo').textContent = t.lblRangeInfo;
+    document.getElementById('prevMonthBtn').textContent = t.prevMonth;
+    document.getElementById('nextMonthBtn').textContent = t.nextMonth;
+    document.getElementById('startMonthBtn').textContent = t.startMonth;
+    document.getElementById('legWorked').textContent = t.legWorked;
+    document.getElementById('legWorkedDed').textContent = t.legWorkedDed;
+    document.getElementById('legUnworked').textContent = t.legUnworked;
+    document.getElementById('legOutRange').textContent = t.legOutRange;
+    document.getElementById('thNum').textContent = t.thNum;
+    document.getElementById('thDay').textContent = t.thDay;
+    document.getElementById('thDate').textContent = t.thDate;
+    document.getElementById('thStatus').textContent = t.thStatus;
+    document.getElementById('thDeduction').textContent = t.thDeduction;
+    document.getElementById('thNetDay').textContent = t.thNetDay;
+    document.getElementById('thCumulative').textContent = t.thCumulative;
+    document.getElementById('thNote').textContent = t.thNote;
+    document.getElementById('skipFriday').checked = state.skipFriday;
+    document.querySelectorAll('.curr').forEach(el => el.textContent = t.curr);
+
+    // Update modal strings
+    document.getElementById('modalTitle').textContent = t.modalTitle;
+    document.getElementById('modalBody').textContent = t.confirmReset;
+    document.getElementById('modalCancelBtn').textContent = t.modalCancel;
+    document.getElementById('modalConfirmBtn').textContent = t.modalConfirm;
+
+    const dates = generateDates();
+    const activeDateMap = new Set(dates.map(d => formatDate(d)));
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    let completedCount = 0;
+    let totalGross = 0;
+    let totalDeductions = 0;
+    let runningNet = 0;
+
+    dates.forEach((dateObj, idx) => {
+      const dayNum = idx + 1;
+      const key = formatDate(dateObj);
+      const isDone = !!state.completed[key];
+      const dedVal = Math.max(0, Number(state.deductions[key] || 0));
+      const grossDay = isDone ? DAILY_RATE : 0;
+      const netDay = grossDay - dedVal;
+
+      if (isDone) completedCount++;
+      totalGross += grossDay;
+      totalDeductions += dedVal;
+      runningNet += netDay;
+
+      const tr = document.createElement('tr');
+      if (isDone && dedVal > 0) {
+        tr.className = 'done-ded';
+      } else if (isDone) {
+        tr.className = 'done';
+      }
+
+      const dayName = t.days[dateObj.getDay()];
+      const noteVal = state.notes[key] || '';
+
+      tr.innerHTML = `
+        <td><strong>${dayNum}</strong></td>
+        <td>${dayName}</td>
+        <td dir="ltr">${key}</td>
+        <td>
+          <button class="toggle-btn" onclick="toggleDay('${key}')">
+            ${isDone ? t.btnDone : t.btnMark}
+          </button>
+        </td>
+        <td>
+          <input class="num-input" type="number" min="0" step="100" value="${dedVal || ''}"
+            placeholder="0" onchange="updateDeduction('${key}', this.value)">
+        </td>
+        <td><strong>${netDay.toLocaleString()} ${t.curr}</strong></td>
+        <td><strong>${runningNet.toLocaleString()} ${t.curr}</strong></td>
+        <td>
+          <input class="note-input" type="text" value="${noteVal.replace(/"/g, '&quot;')}"
+            placeholder="${t.notePlaceholder}" onchange="updateNote('${key}', this.value)">
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const netTotal = totalGross - totalDeductions;
+    document.getElementById('valGross').textContent = `${totalGross.toLocaleString()} ${t.curr}`;
+    document.getElementById('valDeductions').textContent = `${totalDeductions.toLocaleString()} ${t.curr}`;
+    document.getElementById('valNet').textContent = `${netTotal.toLocaleString()} ${t.curr}`;
+    document.getElementById('valDays').textContent = `${completedCount} / ${dates.length}`;
+
+    renderGoals(netTotal, t);
+    renderCalendar(activeDateMap, t);
+  }
+
+  function changeMonth(delta) {
+    const d = new Date(state.viewYear, state.viewMonth + delta, 1);
+    state.viewYear = d.getFullYear();
+    state.viewMonth = d.getMonth();
+    saveState();
+    render();
+  }
+
+  function jumpToStartMonth() {
+    state.viewYear = START_DATE.getFullYear();
+    state.viewMonth = START_DATE.getMonth();
+    saveState();
+    render();
+  }
+
+  function toggleDay(key) {
+    state.completed[key] = !state.completed[key];
+    saveState();
+    render();
+  }
+
+  function updateDeduction(key, val) {
+    const num = Math.max(0, Number(val) || 0);
+    if (num === 0) {
+      delete state.deductions[key];
+    } else {
+      state.deductions[key] = num;
+    }
+    saveState();
+    render();
+  }
+
+  function updateNote(key, val) {
+    state.notes[key] = val;
+    saveState();
+  }
+
+  function toggleLang() {
+    state.lang = state.lang === 'ar' ? 'fr' : 'ar';
+    saveState();
+    render();
+  }
+
+  function toggleSkipFriday() {
+    state.skipFriday = document.getElementById('skipFriday').checked;
+    saveState();
+    render();
+  }
+
+  function openResetModal() {
+    const modal = document.getElementById('resetModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeResetModal() {
+    const modal = document.getElementById('resetModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function confirmReset() {
+    state.completed = {};
+    state.deductions = {};
+    state.notes = {};
+    saveState();
+    render();
+    closeResetModal();
+    showToast(i18n[state.lang].toastReset);
+  }
+
+  function exportCSV() {
+    const t = i18n[state.lang];
+    const dates = generateDates();
+    let csv = '\uFEFF' + [t.thNum, t.thDay, t.thDate, t.thStatus, t.thDeduction, t.thNetDay, t.thCumulative, t.thNote].join(',') + '\n';
+    let running = 0;
+    dates.forEach((d, idx) => {
+      const num = idx + 1;
+      const key = formatDate(d);
+      const done = !!state.completed[key];
+      const ded = Math.max(0, Number(state.deductions[key] || 0));
+      const netDay = (done ? DAILY_RATE : 0) - ded;
+      running += netDay;
+      const row = [
+        num,
+        t.days[d.getDay()],
+        key,
+        done ? '1' : '0',
+        ded,
+        netDay,
+        running,
+        `"${(state.notes[key] || '').replace(/"/g, '""')}"`
+      ];
+      csv += row.join(',') + '\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'work_goals_calendar_sept2027.csv';
+    a.click();
+    showToast(t.toastExport);
+  }
+
+  render();
+</script>
+</body>
+</html>
